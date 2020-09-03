@@ -27,6 +27,8 @@ var userRoutes=require('./routes/users');
 app.use(userRoutes);
 var messageRoutes=require('./routes/messages');
 app.use(messageRoutes.router);
+var messageApisRoutes=require('./routes/messageApis');
+app.use(messageApisRoutes);
 
 var server = app.listen(port, function() {
   console.log('Server is running on port: ' + port)

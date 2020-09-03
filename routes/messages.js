@@ -71,25 +71,7 @@ router.get('/getUser',(req,res,next) => {
     });
 });
 
-router.post('/storeMessages',(req,res,next) => {
-    console.log(req.body);  var message=new Message({ emailId:req.body.sender, toEmailId:req.body.receiver });
-    message.messageContent.push({message:req.body.message,sent:req.body.sender});
-    let sender = Message.findOne({emailId:req.body.sender,toEmailId:req.body.receiver}).exec();
-    sender.then(function(doc){
-        if(doc) {
-           // console.log("Sender email is in database.",doc);
-                Message.update({ $push: {message:req.body.message,sent:req.body.sender} }).exec();
-        }
-        else {
-            console.log("Sender email is not in database.");
-            message.save((err,user) => {
-                console.log("Message store successfully");
-                 return res.status(200).json({msg:"Message store successfully"});
-              });
-        }
-     
-       });
-    });
+
   
     function storeMessages(sender,receiver,message)
     {
@@ -98,7 +80,7 @@ router.post('/storeMessages',(req,res,next) => {
         let senderData = Message.findOne({emailId:sender,toEmailId:receiver}).exec();
         senderData.then(function(doc){
             if(doc) {
-                console.log("Sender email is in database.",doc);
+                console.log("Sender email is in database.");
                     Message.update({_id:doc._id},{ $push:{ messageContent: {message:message,sent:sender} }}).exec();
             }
             else {
@@ -127,32 +109,30 @@ router.post('/storeMessages',(req,res,next) => {
          
            });
     }
-
+    
     router.get('/getMessages',(req,res,next) => {
             console.log(req.query);
             let query = Message.find(
-                { emailId:req.query.sender, toEmailId:req.query.receiver }
-            ).select('messageContent');
+                { $or: [{ emailId:req.query.sender, toEmailId:req.query.receiver }, { emailId:req.query.receiver,toEmailId:req.query.sender }] }
+            ).select('messageContent resetIndex');
             
             query.exec(function (err, messages) {
                 if (err) return next(err);
                // console.log(messages);
-                if(messages.length==0)
+                if(messages[0] && messages[0].messageContent.length!=0)
                 {
-                    let query = Message.find({emailId:req.query.receiver,toEmailId:req.query.sender}).select('messageContent');
-                    query.exec(function (err, messages) {
-                        if (err) return next(err);
-                        console.log("getting messageContent rs");
-                        res.status(200).send({messages:messages});
-                    });
+                    console.log('getting msg',messages);
+                    res.status(200).send({messages:messages[0]});
                 }
                 else
                 {
-                    console.log("getting messageContent")
-                    res.status(200).send({messages:messages});
+                    console.log("no messageContent")
+                    res.status(200).send({messages:messages[0]});
                 }
             });
         });
+
+    
     
   exports.router=router;
   exports.storeMessages=storeMessages;

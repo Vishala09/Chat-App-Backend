@@ -20,8 +20,7 @@ router.use('/register',(req,res,next) => {
                 //console.log(user,"newuser");
                   //if(err)
                     //  res.status(500).json({msg:"Sorry couldn't register. "+err});
-
-                  console.log("User registered successfully");
+                 console.log("User registered successfully");
                  return res.status(200).json({msg:"User registered successfully"});
               })
          }
@@ -67,8 +66,6 @@ router.use('/register',(req,res,next) => {
         res.status(200).json({isLoggedIn:true,emailId:user.emailId,userId:user.userId});
       })
   });
-  
-  
   
   
   router.get('/getAllUsers',(req,res,next) => {
